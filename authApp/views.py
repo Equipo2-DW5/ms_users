@@ -43,23 +43,25 @@ def updateUser(request):
     if request.method == 'POST':
         try:
             usuario = labUser.objects.get(email=request.POST["email"])
-            usuario.password = request.POST["password"]
+            if 'password' in request.POST.keys():
+                usuario.password = request.POST["password"]
             if usuario.role == 'Estudiante':
                 usuario.save()
-                return HttpResponse("No puede modificar más atributos")
+                return HttpResponse("Contraseña actualizada correctamente, No puede cambiar más atributos")
             else:
                 usuario.role = request.POST["role"]
                 usuario.state = request.POST["state"]
                 usuario.save()
                 return HttpResponse("Datos actualizados correctamente")
         except:
-            return HttpResponse("Fail")
+            print(request.POST["password"])
+            return HttpResponse("El usuario no existe")
 
 @csrf_exempt
 def createUser(request):
     if request.method=='POST':
         email = request.POST["email"]
-        username = request.POST["username"]
+        firstName = request.POST["first_name"]
         lastName = request.POST["last_name"]
         password = request.POST["password"]
         role = request.POST["role"]
@@ -68,11 +70,11 @@ def createUser(request):
             return HttpResponse("Ya existe un usuario registrado con este correo")
         except:
             if role != "Estudiante":
-                usuario = labUser.objects.create_superuser(email=email, username=username, last_name=lastName, password=password, role=role)
+                usuario = labUser.objects.create_superuser(email=email, first_name=firstName, last_name=lastName, password=password, role=role)
                 usuario.save()
                 return HttpResponse("Usuario creado correctamente")
             else:
-                usuario = labUser.objects.create_user(email=email, username=username, last_name=lastName, password=password, role='Estudiante')
+                usuario = labUser.objects.create_user(email=email, first_name=firstName, last_name=lastName, password=password, role='Estudiante')
                 usuario.save()
                 return HttpResponse("Usuario creado exitosamente")
             
