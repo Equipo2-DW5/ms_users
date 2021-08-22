@@ -23,8 +23,8 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view()),
     path('token/refresh/', TokenRefreshView.as_view()),
     path('token/verify/', VerifyTokenView.as_view()),
-    path('find/<email>', findUser, name='buscar'),
+    path('find/', findUser, name='buscar'),
     path('update/', updateUser, name='actualizar'),
     path('create/', createUser, name='crear'),
-    path('delete/', deleteUser, name='borrar')
+    path('delete/', deleteUser, name='borrar'),
 ]

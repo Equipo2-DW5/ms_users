@@ -1,10 +1,9 @@
-import json
 from django.http.response import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from authApp.models import labUser
-from django.shortcuts import render
+from authApp.serializers import LabUserSerializer
 from django.conf import settings
 from rest_framework import status
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenVerifyView
 from rest_framework_simplejwt.backends import TokenBackend
@@ -15,10 +14,8 @@ class VerifyTokenView(TokenVerifyView):
     
     def post(self, request, *args, **kwargs):
         token = request.data['token']
-        #print(token)
         tokenBackend = TokenBackend(algorithm=settings.SIMPLE_JWT['ALGORITHM'])
         serializer = self.get_serializer(data=request.data)
-        #print(serializer)
         try:
             serializer.is_valid(raise_exception=True)
             valid_data = tokenBackend.decode(token, verify=False)
@@ -30,41 +27,44 @@ class VerifyTokenView(TokenVerifyView):
 
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
-def findUser(request, email):
+@api_view(['GET'])
+def findUser(request):
+    email = request.data["email"]
     try:
         usuario = labUser.objects.get(email=email)
-        return HttpResponse(usuario)
+        serializer = LabUserSerializer(usuario, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     except: 
-    #data = serializers.serialize('json', [usuario,])
-        return HttpResponse("No Encontrado")
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
-@csrf_exempt
+@api_view(['POST'])
 def updateUser(request):
     if request.method == 'POST':
+        email = request.data["email"]
         try:
-            usuario = labUser.objects.get(email=request.POST["email"])
-            if 'password' in request.POST.keys():
-                usuario.password = request.POST["password"]
+            usuario = labUser.objects.get(email=email)
+            if 'password' in request.data.keys():
+                usuario.set_password(request.data["password"])
             if usuario.role == 'Estudiante':
                 usuario.save()
                 return HttpResponse("Contraseña actualizada correctamente, No puede cambiar más atributos")
             else:
-                usuario.role = request.POST["role"]
-                usuario.state = request.POST["state"]
+                usuario.role = request.data["role"]
+                if 'state' in request.data.keys():
+                    usuario.state = request.data["state"]
                 usuario.save()
                 return HttpResponse("Datos actualizados correctamente")
         except:
-            print(request.POST["password"])
-            return HttpResponse("El usuario no existe")
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-@csrf_exempt
+@api_view(['POST'])
 def createUser(request):
     if request.method=='POST':
-        email = request.POST["email"]
-        firstName = request.POST["first_name"]
-        lastName = request.POST["last_name"]
-        password = request.POST["password"]
-        role = request.POST["role"]
+        email = request.data["email"]
+        firstName = request.data["first_name"]
+        lastName = request.data["last_name"]
+        password = request.data["password"]
+        role = request.data["role"]
         try:
             usuario = labUser.objects.get(email=email)
             return HttpResponse("Ya existe un usuario registrado con este correo")
@@ -72,19 +72,19 @@ def createUser(request):
             if role != "Estudiante":
                 usuario = labUser.objects.create_superuser(email=email, first_name=firstName, last_name=lastName, password=password, role=role)
                 usuario.save()
-                return HttpResponse("Usuario creado correctamente")
+                return Response(status=status.HTTP_201_CREATED)
             else:
                 usuario = labUser.objects.create_user(email=email, first_name=firstName, last_name=lastName, password=password, role='Estudiante')
                 usuario.save()
-                return HttpResponse("Usuario creado exitosamente")
+                return Response(status=status.HTTP_201_CREATED)
             
-@csrf_exempt
+@api_view(['POST'])
 def deleteUser(request):
     if request.method=='POST':
-        email = request.POST["email"]
+        email = request.data["email"]
         try:
             usuario = labUser.objects.get(email=email)
             usuario.delete()
-            return HttpResponse("Usuario borrado con exito")
+            return Response(status=status.HTTP_200_OK)
         except:
-            return HttpResponse("No existe usuario registrado con este email")
+            return Response(status=status.HTTP_404_NOT_FOUND)
