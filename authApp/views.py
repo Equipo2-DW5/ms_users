@@ -47,13 +47,13 @@ def updateUser(request):
                 usuario.set_password(request.data["password"])
             if usuario.role == 'Estudiante':
                 usuario.save()
-                return HttpResponse("Contraseña actualizada correctamente, No puede cambiar más atributos")
+                return Response({"output":"Contraseña actualizada correctamente, No puede cambiar más atributos"}, status=status.HTTP_200_OK)
             else:
                 usuario.role = request.data["role"]
                 if 'state' in request.data.keys():
                     usuario.state = request.data["state"]
                 usuario.save()
-                return HttpResponse("Datos actualizados correctamente")
+                return Response({"output":"Datos actualizados correctamente"}, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -67,7 +67,7 @@ def createUser(request):
         role = request.data["role"]
         try:
             usuario = labUser.objects.get(email=email)
-            return HttpResponse("Ya existe un usuario registrado con este correo")
+            return Response({"output":"Ya existe un usuario registrado con este correo"}, status=status.HTTP_400_BAD_REQUEST)
         except:
             if role != "Estudiante":
                 usuario = labUser.objects.create_superuser(email=email, first_name=firstName, last_name=lastName, password=password, role=role)
