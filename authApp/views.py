@@ -1,11 +1,10 @@
-from django.http.response import HttpResponse
 from authApp.models import labUser
-from authApp.serializers import LabUserSerializer
+from authApp.serializers import LabUserSerializer, MyTokenObtainPairSerializer
 from django.conf import settings
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework_simplejwt.views import TokenVerifyView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
@@ -26,6 +25,9 @@ class VerifyTokenView(TokenVerifyView):
             raise InvalidToken(e.args[0])
 
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
+    
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 @api_view(['GET'])
 def findUser(request):
