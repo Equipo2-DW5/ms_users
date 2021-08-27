@@ -19,6 +19,7 @@ class VerifyTokenView(TokenVerifyView):
             serializer.is_valid(raise_exception=True)
             valid_data = tokenBackend.decode(token, verify=False)
             serializer.validated_data['id'] = valid_data['user_id']
+            serializer.validated_data['email'] = valid_data['email']
             #pass
 
         except TokenError as e:
