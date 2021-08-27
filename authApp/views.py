@@ -32,8 +32,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 @api_view(['GET'])
-def findUser(request):
-    email = request.data["email"]
+def findUser(request, email):
     try:
         usuario = labUser.objects.get(email=email)
         serializer = LabUserSerializer(usuario, many=False)
