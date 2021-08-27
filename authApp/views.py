@@ -74,11 +74,11 @@ def createUser(request):
             if role != "Estudiante":
                 usuario = labUser.objects.create_superuser(email=email, first_name=firstName, last_name=lastName, password=password, role=role)
                 usuario.save()
-                return Response(status=status.HTTP_201_CREATED)
+                return Response({"output":"Usuario registrado con exito"}, status=status.HTTP_201_CREATED)
             else:
                 usuario = labUser.objects.create_user(email=email, first_name=firstName, last_name=lastName, password=password, role='Estudiante')
                 usuario.save()
-                return Response(status=status.HTTP_201_CREATED)
+                return Response({"output":"Usuario registrado con exito"}, status=status.HTTP_201_CREATED)
             
 @api_view(['POST'])
 def deleteUser(request):
@@ -87,6 +87,6 @@ def deleteUser(request):
         try:
             usuario = labUser.objects.get(email=email)
             usuario.delete()
-            return Response(status=status.HTTP_200_OK)
+            return Response({"output":"Usuario eliminado con exito"}, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
