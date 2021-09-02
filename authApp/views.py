@@ -48,15 +48,12 @@ def updateUser(request):
             usuario = labUser.objects.get(email=email)
             if 'password' in request.data.keys():
                 usuario.set_password(request.data["password"])
-            if usuario.role == 'Estudiante':
-                usuario.save()
-                return Response({"output":"Contraseña actualizada correctamente, No puede cambiar más atributos"}, status=status.HTTP_200_OK)
-            else:
+            if 'role' in request.data.keys():
                 usuario.role = request.data["role"]
-                if 'state' in request.data.keys():
-                    usuario.state = request.data["state"]
-                usuario.save()
-                return Response({"output":"Datos actualizados correctamente"}, status=status.HTTP_200_OK)
+            if 'state' in request.data.keys():
+                usuario.state = request.data["state"]
+            usuario.save()
+            return Response({"output":"Datos actualizados correctamente"}, status=status.HTTP_200_OK)
         except:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
